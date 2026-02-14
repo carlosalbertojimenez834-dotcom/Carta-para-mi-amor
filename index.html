@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Cumpleaños, Mi Amor</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        script: ['"Dancing Script"', 'cursive'],
+                        body: ['"Montserrat"', 'sans-serif'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #fff1f2;
+        }
+
+        /* Corazones flotantes de fondo */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .heart-bg {
+            position: absolute;
+            color: rgba(244, 63, 94, 0.1);
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* Clases utilitarias */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .photo-card {
+            transition: transform 0.1s;
+            transform-style: preserve-3d;
+        }
+
+        /* Cursor personalizado opcional */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e11d48;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+        
+        .custom-cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(225, 29, 72, 0.1);
+            border-color: transparent;
+        }
+
+        .scroll-down-arrow {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+        
+        /* Ocultar scrollbar pero permitir scroll */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff1f2; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fda4af; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="font-body text-gray-800 antialiased selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Cursor personalizado -->
+    <div id="cursor" class="custom-cursor hidden md:block"></div>
+
+    <!-- Fondo animado -->
+    <div class="floating-hearts" id="heartContainer"></div>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col justify-center items-center relative px-4 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-rose-100 via-purple-100 to-white opacity-80 z-[-1]"></div>
+        
+        <div class="text-center z-10 hero-content opacity-0 translate-y-10">
+            <div class="mb-4 flex justify-center space-x-2">
+                <i data-lucide="heart" class="text-rose-500 w-8 h-8 fill-rose-500 animate-pulse"></i>
+            </div>
+            <h2 class="text-xl md:text-3xl font-light text-rose-600 mb-2 tracking-widest uppercase">Hoy es un día especial</h2>
+            <h1 class="font-script text-6xl md:text-9xl text-rose-500 mb-6 drop-shadow-sm leading-tight p-4">
+                Feliz Cumpleaños <br> <span class="text-gray-800">Mi Amor</span>
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Gracias por ser tan especial y motivarme cada día para cumplir mi meta de ir a España.
+            </p>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 scroll-down-arrow cursor-pointer z-20" onclick="scrollToGallery()">
+            <i data-lucide="chevron-down" class="w-10 h-10 text-rose-400"></i>
+        </div>
+    </section>
+
+    <!-- Gallery / Memories Section -->
+    <section id="gallery" class="py-20 px-4 md:px-10 relative">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-script text-center text-rose-600 mb-16 section-title">Nuestros Momentos</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                
+                <!-- Foto 1 -->
+                <div class="photo-card-container group perspective-1000">
+                    <div class="photo-card relative bg-white p-3 rounded-2xl shadow-xl transform transition-all duration-500 group-hover:-translate-y-2">
+                        <div class="overflow-hidden rounded-xl aspect-[4/5] relative">
+                            <!-- Placeholder Image 1 -->
+                            <img src="https://i.imgur.com/beucaeT.jpeg" alt="Nosotros" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                                <span class="text-white font-script text-2xl">Tu sonrisa</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <h3 class="font-bold text-gray-700">La primera cita</h3>
+                            <p>
+                                Cuando fuimos al prom y te veías bien hermosa y luego me desnudaste para cubrirte de los mosquitos.
+                            <p>
+                            <p class="text-sm text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foto 2 -->
+                <div class="photo-card-container group perspective-1000 mt-0 md:mt-16">
+                    <div class="photo-card relative bg-white p-3 rounded-2xl shadow-xl transform transition-all duration-500 group-hover:-translate-y-2">
+                        <div class="overflow-hidden rounded-xl aspect-[4/5] relative">
+                             <!-- Placeholder Image 2 -->
+                            <img src="https://i.imgur.com/RwxQB2Y.jpeg" alt="Viaje" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                                <span class="text-white font-script text-2xl">Aventuras</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <h3 class="font-bold text-gray-700">Nuestras aventuras</h3>
+                            <p>
+                                Cuando fuimos a Toronto y yo aproveché para darte un besito mientras nadie veía y después nos fuimos solitos a un parque.
+                            <p>
+                            <p class="text-sm text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foto 3 -->
+                <div class="photo-card-container group perspective-1000">
+                    <div class="photo-card relative bg-white p-3 rounded-2xl shadow-xl transform transition-all duration-500 group-hover:-translate-y-2">
+                        <div class="overflow-hidden rounded-xl aspect-[4/5] relative">
+                             <!-- Placeholder Image 3 -->
+                            <img src="https://i.imgur.com/9ps4WDK.jpeg" alt="Cena" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+                                <span class="text-white font-script text-2xl">Juntos</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <h3 class="font-bold text-gray-700">Momentos lindos</h3>
+                            <p>
+                                Cuando me acompañaste a comprar el traje para el prom y yo aprobechava para poder pasar tiempo contigo y también te agarraa la manita
+                            <p>
+                            <p class="text-sm text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Love Letter Section -->
+    <section class="py-20 px-4 relative">
+        <div class="max-w-3xl mx-auto relative z-10">
+            <div class="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden love-letter opacity-0 translate-y-20">
+                <!-- Decorative elements inside card -->
+                <div class="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-rose-200 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-purple-200 rounded-full blur-3xl opacity-50"></div>
+                
+                <div class="relative z-10 text-center">
+                    <div class="inline-block p-3 bg-white rounded-full shadow-md mb-6">
+                        <i data-lucide="pen-tool" class="w-6 h-6 text-rose-500"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-script text-rose-600 mb-8">Para la cumpleañera más hermosa...</h2>
+                    
+                    <div class="text-left space-y-6 text-gray-700 md:text-lg leading-relaxed font-light">
+                        <p>
+                            Quería aprovechar este día no solo para decirte feliz Cumpleaños, sino para recordarte lo increíble que eres.
+                        </p>
+                        <p>
+                            El simple hecho de convivir contigo me ha hecho querer estar contigo cada día, tanto que me haces cambiar de continente solo para ir a verte. Estoy muy emocionado de poder tener la oportunidad de estar contigo y vivir muy cerca de ti. Eres la persona más increible que he conocido y todos los días me haces enamorarme más de ti. Lamento no poder estar contigo este cumpleaños pero el siguiente lo estaré y te llenaré de besos y apapachos.
+                        </p>
+                        <p>
+                            Cada día que pasa ansío que llegue el día en que llegue al aeropuerto y me recibas con los ojitos llorosos y una sonrisa muy linda y nos abracemos y lloremos muy lindos. Cada día pienso en como serán nuestras vidas allá y lo bien que nos la pasaremos juntos porque somos el uno para el otro. y la neta del planeta estoy súper enamoradisisisisisimo de ti y te quiero agarrar a besos todos los días. 
+                        <p>
+                        <p>
+                            Sé que cuando estemos juntos vamos a ser muy felices, especialmente yo porque estar contigo me trae muchísimos sentimientos como emoción, felicidad, calma y sobre todo mucho amor. La razóm mas grande para mudarme de país yo creo que ya no es la universidad ni la calidad de vida ni nada de eso porque yo siento que la razón para cambiarme de país eres tú y el querer estar a tu lado todo el tiempo posible por lo increíble que eres, porque de ti me encanta lo hermosa que eres, tu risa tan bonita y como se te hacen los ojitos pequeños cuando sonríes, además de que eres una persona tan divertida y con la que se disfruta pasar el tiempo, el hecho de que eres graciosa y animada además de muy inteligente y tierna. Simplemente me encanta todo de ti y por eso quiero estar contigo por lo perfecta que eres para mí.
+                        <p>
+                        <p>
+                            Te prometo que haré todo lo posible para poder ir contigo este año y que estaremos juntos más temprano que tarde, porque yo sé 100% que iré a España y que podremos estar ser novios.
+                        <p>
+                        <p>
+                            Espero que este nuevo año de vida te traiga tanta alegría como la que tú traes a la mía y que podamos estar juntos este año. TE AMO.
+                        </p>
+                    </div>
+
+                    <div class="mt-10 pt-6 border-t border-rose-100">
+                        <p class="font-script text-3xl text-rose-500 text-right">- Con todo mi amor</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Surprise / Interactive Section -->
+    <section class="min-h-[60vh] flex flex-col justify-center items-center py-20 relative overflow-hidden">
+        <h2 class="text-3xl md:text-5xl font-script text-gray-800 mb-8 text-center z-10">Una última cosa...</h2>
+        
+        <button id="giftBtn" class="group relative z-10 transition-transform active:scale-95 focus:outline-none">
+            <div class="absolute -inset-1 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+            <div class="relative px-10 py-5 bg-white ring-1 ring-gray-900/5 rounded-full leading-none flex items-center space-x-4 shadow-xl">
+                <i data-lucide="gift" class="w-6 h-6 text-rose-500 group-hover:rotate-12 transition-transform"></i>
+                <span class="text-rose-600 font-bold tracking-wider group-hover:text-rose-700 transition-colors">PRESIONA AQUÍ</span>
+            </div>
+        </button>
+
+        <!-- Hidden Message Container -->
+        <div id="hiddenMessage" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-500">
+            <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full mx-4 text-center transform scale-75 transition-transform duration-500" id="msgContent">
+                <div class="w-full h-64 bg-rose-100 rounded-2xl mb-6 overflow-hidden shadow-inner">
+                    <img src="https://i.imgur.com/xOZkPIQ.png" alt="Sorpresa Especial" class="w-full h-full object-cover">
+                </div>
+                <h3 class="text-3xl font-script text-rose-600 mb-2">¡Te Amo Mucho!</h3>
+                <p class="text-gray-600 mb-6 text-sm">Ya quiero ir a Valencia para ser MUY novios</p>
+                <button onclick="closeMessage()" class="px-8 py-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/30 font-medium">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white/50 backdrop-blur-sm py-8 text-center border-t border-white">
+        <p class="text-gray-500 font-light text-sm">Hecho por Carlitos ❤️ para mi amorcito</p>
+    </footer>
+
+    <script>
+        // Inicializar Iconos
+        lucide.createIcons();
+
+        // Registrar ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Animación del Hero (Entrada inicial)
+        const tl = gsap.timeline();
+        tl.to(".hero-content", {
+            opacity: 1,
+            y: 0,
+            duration: 1.5,
+            ease: "power3.out"
+        })
+        .from(".hero-content h2", { opacity: 0, x: -20, duration: 1 }, "-=1")
+        .from(".hero-content h1", { scale: 0.9, opacity: 0, duration: 1.2, ease: "back.out(1.7)" }, "-=0.8")
+        .from(".hero-content p", { opacity: 0, y: 20, duration: 1 }, "-=0.8");
+
+        // 2. Animaciones al hacer Scroll (Galería)
+        gsap.utils.toArray('.photo-card-container').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 100,
+                opacity: 0,
+                rotation: i % 2 === 0 ? 5 : -5,
+                duration: 1,
+                ease: "power2.out"
+            });
+        });
+
+        // 3. Animación de la Carta de Amor
+        gsap.to(".love-letter", {
+            scrollTrigger: {
+                trigger: ".love-letter",
+                start: "top 80%"
+            },
+            opacity: 1,
+            y: 0,
+            duration: 1.2,
+            ease: "power3.out"
+        });
+
+        // 4. Efecto de Corazones Flotantes (Background)
+        const heartContainer = document.getElementById('heartContainer');
+        const heartSymbols = ['❤', '💖', '💕', '✨', '🌸'];
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-bg');
+            heart.innerHTML = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 5 + 10 + 's'; // 10-15s
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            
+            heartContainer.appendChild(heart);
+
+            // Eliminar después de la animación para no saturar el DOM
+            setTimeout(() => {
+                heart.remove();
+            }, 15000);
+        }
+
+        setInterval(createHeart, 500);
+
+        // 5. Interactive Tilt Effect para las fotos (Vanilla JS)
+        document.querySelectorAll('.photo-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // Max rotation deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        });
+
+        // 6. Custom Cursor Logic (Solo desktop)
+        const cursor = document.getElementById('cursor');
+        const links = document.querySelectorAll('a, button, .photo-card');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        links.forEach(link => {
+            link.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            link.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // 7. Confetti Surprise Button
+        const giftBtn = document.getElementById('giftBtn');
+        const hiddenMessage = document.getElementById('hiddenMessage');
+        const msgContent = document.getElementById('msgContent');
+
+        giftBtn.addEventListener('click', () => {
+            // Sonido de celebración (Opcional, los navegadores bloquean autoplay a veces)
+            // const audio = new Audio('tada.mp3'); audio.play();
+
+            // Lanzar Confeti
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#f43f5e', '#a855f7', '#fb7185']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#f43f5e', '#a855f7', '#fb7185']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+            
+            // Explosión central
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    shapes: ['heart'],
+                    colors: ['#FFC0CB', '#FF69B4', '#FF1493']
+                });
+                
+                // Mostrar Mensaje
+                hiddenMessage.classList.remove('opacity-0', 'pointer-events-none');
+                msgContent.classList.remove('scale-75');
+                msgContent.classList.add('scale-100');
+            }, 500);
+        });
+
+        function closeMessage() {
+            hiddenMessage.classList.add('opacity-0', 'pointer-events-none');
+            msgContent.classList.remove('scale-100');
+            msgContent.classList.add('scale-75');
+        }
+
+        function scrollToGallery() {
+            document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+        }
+
+    </script>
+</body>
+</html>
